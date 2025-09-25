@@ -9,7 +9,7 @@ import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className="w-full bg-gray-100 py-12 px-6 sm:px-12 lg:px-24">
+    <footer className="mt-10 w-full bg-gray-100 py-12 px-6 sm:px-12 lg:px-24">
       <div className="grid sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-10 mb-12">
         <div className="flex flex-col items-start justify-between">
           <div className="flex items-center gap-2 font-bold text-xl text-[#212337] mb-4">
