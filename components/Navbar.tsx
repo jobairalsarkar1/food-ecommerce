@@ -22,7 +22,7 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50">
       <div
-        className="w-full h-16 flex items-center justify-between px-4 sm:px-8 md:px-12 lg:px-18 
+        className="w-full h-16 flex items-center justify-between px-4 sm:px-8 md:px-12 lg:px-20 
         bg-green-200/90 md:bg-transparent backdrop-blur"
       >
         {/* Branding */}
