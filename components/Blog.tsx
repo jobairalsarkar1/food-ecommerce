@@ -3,6 +3,7 @@ import Badge from "./Badge";
 import Image from "next/image";
 import Link from "next/link";
 import { FaLongArrowAltRight } from "react-icons/fa";
+import { FaArrowRightLong } from "react-icons/fa6";
 
 const Blog = () => {
   const blogs = [
@@ -61,7 +62,7 @@ const Blog = () => {
                 href={`/blog/${blog.id}`}
                 className="flex items-center gap-2 text-[#FF6A1A] font-medium hover:underline mt-3"
               >
-                Read More <FaLongArrowAltRight />
+                Read More <FaArrowRightLong />
               </Link>
             </div>
           </div>
