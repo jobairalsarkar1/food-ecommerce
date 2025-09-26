@@ -30,7 +30,7 @@ const Blog = () => {
   ];
 
   return (
-    <section className="w-full py-12 px-6 sm:px-12 lg:px-20">
+    <div className="w-full py-12 px-6 sm:px-12 lg:px-20">
       <div className="w-full flex flex-col items-center text-center max-w-2xl mx-auto mb-12">
         <Badge text="Our Blog" />
         <h1 className="mt-4 text-3xl md:text-4xl font-bold text-[#212337]">
@@ -68,7 +68,7 @@ const Blog = () => {
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 };
 

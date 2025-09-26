@@ -6,7 +6,7 @@ import { BsGridFill } from "react-icons/bs";
 
 const AboutUs = () => {
   return (
-    <div className="w-full py-12 px-6 md:px-8 lg:px-20 xl:px-32 2xl:px-40 bg-gray-200 overflow-hidden">
+    <div className="w-full py-12 px-6 md:px-8 lg:px-20 xl:px-32 2xl:px-40 overflow-hidden">
       <div className="w-full flex items-center justify-center">
         <Link
           href="#"
@@ -54,11 +54,11 @@ const AboutUs = () => {
               className="mx-auto mb-1 sm:mb-2 md:mb-3"
             />
 
-            <h3 className="text-[10px] sm:text-xs md:text-sm lg:text-base font-semibold text-[#212337]">
+            <h3 className="text-[10px] sm:text-xs md:text-sm font-semibold text-[#212337]">
               Organic Apples
             </h3>
 
-            <p className="text-gray-700 text-[10px] sm:text-xs md:text-sm lg:text-base mt-0.5 sm:mt-1">
+            <p className="text-gray-700 text-[10px] sm:text-xs mt-0.5 sm:mt-1">
               $12.99
             </p>
 
@@ -69,7 +69,7 @@ const AboutUs = () => {
                      w-full rounded-md 
                      text-[10px] sm:text-xs md:text-sm lg:text-base 
                      text-gray-600 font-medium 
-                     border border-gray-400 
+                     border border-gray-300 
                      transition cursor-pointer hover:bg-gray-100"
             >
               Add to Cart
