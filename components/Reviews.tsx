@@ -39,8 +39,22 @@ const Reviews = () => {
 
   return (
     <section className="relative w-full py-16 px-6 sm:px-12 lg:px-20">
-      <div className="absolute top-[20%] left-[18%] w-16 h-16 rounded-full bg-green-600"/>
-      <div className="absolute top-[25%] right-[20%] w-16 h-16 rounded-full bg-green-600"/>
+      {/* Decorative leafs */}
+      <Image
+        src="/fallen_leaf.png"
+        alt="Leaf decoration"
+        width={64}
+        height={64}
+        className="absolute top-[20%] left-[18%] w-16 h-16 object-contain rotate-[140deg]"
+      />
+      <Image
+        src="/fallen_leaf.png"
+        alt="Leaf decoration"
+        width={64}
+        height={64}
+        className="absolute top-[25%] right-[20%] w-16 h-16 object-contain rotate-[-80deg]"
+      />
+
       <div className="w-full flex flex-col items-center text-center max-w-2xl mx-auto mb-12">
         <Badge text="Testimonial" />
         <h1 className="mt-4 text-3xl md:text-4xl font-bold text-[#212337]">

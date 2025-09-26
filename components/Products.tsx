@@ -77,9 +77,9 @@ const Products = () => {
         {filteredProducts.map((product) => (
           <div
             key={product.id}
-            className="flex flex-col items-center rounded-lg p-5 bg-white shadow-md hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition"
+            className="flex flex-col items-center rounded-xl p-5 bg-white shadow-md hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition"
           >
-            <div className="bg-[#F4F6F6] w-full h-48 flex items-center justify-center rounded-md">
+            <div className="bg-[#F4F6F6] w-full h-48 flex items-center justify-center rounded-lg">
               <Image
                 src="/featuring_01.png"
                 alt={product.name}
