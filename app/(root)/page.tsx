@@ -1,3 +1,4 @@
+import Hero from "@/components/Hero";
 import AboutUs from "@/components/AboutUs";
 import SpecialOffer from "@/components/SpecialOffer";
 import Reviews from "@/components/Reviews";
@@ -7,9 +8,9 @@ import Products from "@/components/Products";
 export default function Home() {
   return (
     <div className="font-sans">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        Fresh Harvest Main Body.
-      </main>
+      <section>
+        <Hero />
+      </section>
       <section>
         <Products />
       </section>

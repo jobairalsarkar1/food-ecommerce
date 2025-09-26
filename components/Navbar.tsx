@@ -20,11 +20,8 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50">
-      <div
-        className="w-full h-16 flex items-center justify-between px-4 sm:px-8 md:px-12 lg:px-20 
-        bg-green-200/90 md:bg-transparent backdrop-blur"
-      >
+    <header className="fixed top-0 left-0 right-0 z-50">
+      <div className="w-full h-16 flex items-center justify-between px-4 sm:px-8 md:px-12 lg:px-20 md:bg-transparent backdrop-blur-xs">
         {/* Branding */}
         <div className="flex items-center gap-2 font-bold text-xl">
           <BsGridFill className="w-7 h-7 text-[#749B3F]" />

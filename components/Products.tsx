@@ -27,8 +27,22 @@ const Products = () => {
 
   return (
     <div className="relative w-full py-12 px-6 sm:px-12 lg:px-20">
-      <div className="absolute top-10 right-[10%] w-16 h-16 rounded-full bg-green-700" />
-      <div className="absolute top-25 left-[12%] w-16 h-16 rounded-full bg-green-700" />
+      {/* Leaf decorations */}
+      <Image
+        src="/fallen_leaf.png"
+        alt="Leaf decoration"
+        width={64}
+        height={64}
+        className="absolute top-10 right-[10%] w-16 h-16 object-contain rotate-[-80deg]"
+      />
+      <Image
+        src="/fallen_leaf.png"
+        alt="Leaf decoration"
+        width={64}
+        height={64}
+        className="absolute top-25 left-[12%] w-16 h-16 object-contain rotate-[150deg]"
+      />
+
       <div className="mt-16 w-full flex flex-col items-center text-center max-w-2xl mx-auto mb-12">
         <Badge text="Our Products" />
         <h1 className="mt-4 text-3xl md:text-4xl font-bold text-[#212337]">

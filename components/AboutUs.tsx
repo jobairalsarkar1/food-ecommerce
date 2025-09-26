@@ -19,7 +19,13 @@ const AboutUs = () => {
       <div className="flex flex-col lg:flex-row items-center gap-10 max-w-[1400px] mx-auto">
         <div className="relative w-full lg:w-1/2 h-[280px] sm:h-[350px] md:h-[420px] lg:h-[500px]">
           {/* Leaf */}
-          <div className="absolute w-16 h-16 rounded-full bg-green-500 top-14 right-10" />
+          <Image
+            src="/fallen_leaf.png"
+            alt="Leaf decoration"
+            width={64}
+            height={64}
+            className="absolute top-14 right-10 w-16 h-16 object-contain rotate-[-80deg]"
+          />
           <div className="relative w-full h-full rounded-b-full overflow-hidden">
             <Image
               src="/featuring-02.png"
