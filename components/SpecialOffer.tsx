@@ -32,7 +32,7 @@ const SpecialOffer = () => {
   }, []);
 
   return (
-    <section className="w-full py-12 px-6 md:px-8 lg:px-20 xl:px-32 2xl:px-40 bg-gray-200 relative overflow-hidden">
+    <section className="w-full py-16 px-6 md:px-8 lg:px-20 xl:px-32 2xl:px-40 bg-gray-200 relative overflow-hidden">
       {/* leaf circles */}
       <div className="absolute w-20 h-20 bg-green-600 rounded-full bottom-10 right-0 opacity-80"></div>
       <div className="absolute w-24 h-24 bg-green-700 rounded-full -bottom-5 -left-5 opacity-80"></div>

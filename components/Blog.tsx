@@ -2,7 +2,6 @@ import React from "react";
 import Badge from "./Badge";
 import Image from "next/image";
 import Link from "next/link";
-import { FaLongArrowAltRight } from "react-icons/fa";
 import { FaArrowRightLong } from "react-icons/fa6";
 
 const Blog = () => {
@@ -30,7 +29,8 @@ const Blog = () => {
   ];
 
   return (
-    <div className="w-full py-12 px-6 sm:px-12 lg:px-20">
+    <div className="relative w-full py-12 px-6 sm:px-12 lg:px-20">
+      <div className="absolute top-[14%] right-[15%] w-16 h-16 rounded-full bg-green-600" />
       <div className="w-full flex flex-col items-center text-center max-w-2xl mx-auto mb-12">
         <Badge text="Our Blog" />
         <h1 className="mt-4 text-3xl md:text-4xl font-bold text-[#212337]">
