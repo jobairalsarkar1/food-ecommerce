@@ -1,9 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { FaFacebook } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
+import React, { useState, useEffect } from "react";
 import { IoClose, IoEye, IoEyeOff } from "react-icons/io5";
+import { FcGoogle } from "react-icons/fc";
+import { FaFacebook } from "react-icons/fa";
+import { FaSpinner } from "react-icons/fa6";
+import { AiOutlineCheckCircle, AiOutlineCloseCircle } from "react-icons/ai";
+import { toast } from "react-hot-toast";
+import { useRegisterUserMutation } from "@/store/apiSlice";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { SerializedError } from "@reduxjs/toolkit";
 
 type SignUpModalProps = {
   isOpen: boolean;
@@ -20,51 +26,59 @@ const SignUpModal = ({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+
+  const [
+    registerUser,
+    { isLoading, isError, error, isSuccess, data, reset: resetRegister },
+  ] = useRegisterUserMutation();
+
+  // custom toasts
+  const showSuccessToast = (msg: string) =>
+    toast.custom(
+      <div className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-md font-medium">
+        <AiOutlineCheckCircle size={20} />
+        <span>{msg}</span>
+      </div>,
+      { position: "top-right", duration: 2000 }
+    );
+
+  const showErrorToast = (msg: string) =>
+    toast.custom(
+      <div className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-md font-medium">
+        <AiOutlineCloseCircle size={20} />
+        <span>{msg}</span>
+      </div>,
+      { position: "top-right", duration: 3000 }
+    );
+
+  // success & error handling
+  useEffect(() => {
+    if (isSuccess && data) {
+      showSuccessToast(data.message || "Registration successful!");
+      setFullName("");
+      setEmail("");
+      setPassword("");
+      resetRegister(); // reset mutation state
+      setTimeout(onClose, 2000);
+    }
+
+    if (isError && error) {
+      const err = error as FetchBaseQueryError | SerializedError;
+      if ("data" in err && err.data) {
+        const apiError = err.data as { message?: string };
+        showErrorToast(apiError.message || "Something went wrong");
+      } else {
+        showErrorToast("Network error. Please try again.");
+      }
+      resetRegister(); // reset mutation state
+    }
+  }, [isSuccess, isError, error, data, onClose, resetRegister]);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      const res = await fetch(
-        "https://api-fresh-harvest.code-commando.com/api/v1/users/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ fullName, email, password }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Something went wrong");
-      } else {
-        setSuccess("Registration successful!");
-        setFullName("");
-        setEmail("");
-        setPassword("");
-        // Closes modal automatically after 2 seconds
-        setTimeout(onClose, 2000);
-      }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Network error");
-      }
-    } finally {
-      setLoading(false);
-    }
+    await registerUser({ fullName, email, password });
   };
 
   return (
@@ -87,11 +101,6 @@ const SignUpModal = ({
         <h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-          {success && (
-            <p className="text-green-500 text-sm text-center">{success}</p>
-          )}
-
           {/* Full Name */}
           <div>
             <label className="block text-sm font-medium mb-1">Full Name</label>
@@ -143,14 +152,14 @@ const SignUpModal = ({
           {/* Submit */}
           <button
             type="submit"
-            disabled={loading}
-            className={`w-full text-white font-semibold rounded-lg py-2 ${
-              loading
+            disabled={isLoading}
+            className={`w-full text-white font-semibold rounded-lg py-2 flex items-center justify-center gap-2 ${
+              isLoading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-orange-500 hover:bg-orange-600 cursor-pointer"
             }`}
           >
-            {loading ? "Signing Up..." : "Sign Up"}
+            {isLoading ? <FaSpinner className="animate-spin" /> : "Sign Up"}
           </button>
         </form>
 
@@ -161,7 +170,6 @@ const SignUpModal = ({
           <div className="flex-1 h-px bg-gray-300"></div>
         </div>
 
-        {/* Social buttons */}
         <div className="flex gap-4">
           <button className="flex-1 flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-2 hover:bg-gray-50 cursor-pointer">
             <FcGoogle size={20} /> Google

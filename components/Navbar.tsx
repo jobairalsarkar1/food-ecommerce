@@ -24,6 +24,8 @@ const Navbar = () => {
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
+  const auth = useSelector((state: RootState) => state.auth);
+
   const navLinks = [
     { name: "Home", href: "/#home" },
     { name: "Shop", href: "/#shop" },
@@ -56,6 +58,10 @@ const Navbar = () => {
       document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showCartModal]);
+
+  const userInitial = auth.user?.userName
+    ? auth.user.userName.charAt(0).toUpperCase()
+    : auth.user?.email?.charAt(0).toUpperCase() || "";
 
   return (
     <>
@@ -121,12 +127,19 @@ const Navbar = () => {
               )}
             </div>
 
-            <button
-              onClick={() => setShowSignIn(true)}
-              className="px-6 py-2 font-semibold border-2 border-gray-800 text-gray-800 rounded-md hover:bg-gray-800 hover:text-white transition"
-            >
-              Sign in
-            </button>
+            {/* User login / avatar */}
+            {auth.user ? (
+              <div className="w-10 h-10 bg-[#749B3F] text-white rounded-full flex items-center justify-center font-semibold text-lg">
+                {userInitial}
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowSignIn(true)}
+                className="px-6 py-2 font-semibold border-2 border-gray-800 text-gray-800 rounded-md hover:bg-gray-800 hover:text-white transition"
+              >
+                Sign in
+              </button>
+            )}
           </div>
 
           {/* Mobile Icons */}
@@ -190,15 +203,17 @@ const Navbar = () => {
           </ul>
 
           <div className="px-6">
-            <button
-              onClick={() => {
-                setIsOpen(false);
-                setShowSignIn(true);
-              }}
-              className="px-6 py-2 font-semibold border-2 border-gray-800 text-gray-800 rounded-md hover:bg-gray-800 hover:text-white transition inline-block"
-            >
-              Sign in
-            </button>
+            {!auth.user && (
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  setShowSignIn(true);
+                }}
+                className="px-6 py-2 font-semibold border-2 border-gray-800 text-gray-800 rounded-md hover:bg-gray-800 hover:text-white transition inline-block"
+              >
+                Sign in
+              </button>
+            )}
           </div>
         </div>
 

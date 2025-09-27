@@ -3,7 +3,18 @@
 import React, { useState } from "react";
 import { IoClose, IoEye, IoEyeOff } from "react-icons/io5";
 import { FcGoogle } from "react-icons/fc";
-import { FaFacebook } from "react-icons/fa";
+import { FaFacebook, FaSpinner } from "react-icons/fa6";
+import { AiOutlineCheckCircle, AiOutlineCloseCircle } from "react-icons/ai";
+import { toast } from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "@/store/authSlice";
+import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { SerializedError } from "@reduxjs/toolkit";
+
+import {
+  useLoginUserMutation,
+  useLazyGetUserProfileQuery,
+} from "@/store/apiSlice";
 
 type SignInModalProps = {
   isOpen: boolean;
@@ -21,11 +32,64 @@ const SignInModal = ({
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
 
+  const dispatch = useDispatch();
+
+  const [loginUser, { isLoading }] = useLoginUserMutation();
+  const [fetchUserProfile] = useLazyGetUserProfileQuery();
+
+  // Custom toasts
+  const showSuccessToast = (msg: string) =>
+    toast.custom(
+      <div className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-md font-medium">
+        <AiOutlineCheckCircle size={20} />
+        <span>{msg}</span>
+      </div>,
+      { position: "top-right", duration: 2000 }
+    );
+
+  const showErrorToast = (msg: string) =>
+    toast.custom(
+      <div className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-md font-medium">
+        <AiOutlineCloseCircle size={20} />
+        <span>{msg}</span>
+      </div>,
+      { position: "top-right", duration: 3000 }
+    );
+
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Mock Sign In Data:", { email, password, remember });
+
+    try {
+      // login API
+      const loginResult = await loginUser({ email, password }).unwrap();
+
+      // user profile
+      const profile = await fetchUserProfile(loginResult.data.token).unwrap();
+
+      // save into redux
+      dispatch(
+        setCredentials({ token: loginResult.data.token, user: profile.data })
+      );
+
+      // success toast
+      showSuccessToast(loginResult.message || "Login successful!");
+
+      // resets fields
+      setEmail("");
+      setPassword("");
+
+      setTimeout(onClose, 2000);
+    } catch (err) {
+      const typedError = err as FetchBaseQueryError | SerializedError;
+      if ("data" in typedError && typedError.data) {
+        const apiError = typedError.data as { message?: string };
+        showErrorToast(apiError.message || "Something went wrong");
+      } else {
+        showErrorToast("Network error. Please try again");
+      }
+    }
   };
 
   return (
@@ -56,7 +120,7 @@ const SignInModal = ({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="Enter you email"
+              placeholder="Enter your email"
               className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
@@ -83,7 +147,7 @@ const SignInModal = ({
             </div>
           </div>
 
-          {/* Remember + Forgot */}
+          {/* Remember & Forgot */}
           <div className="flex items-center justify-between text-sm">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -104,18 +168,25 @@ const SignInModal = ({
 
           <button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg py-2 cursor-pointer"
+            disabled={isLoading}
+            className={`w-full text-white font-semibold rounded-lg py-2 flex items-center justify-center gap-2 ${
+              isLoading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-orange-500 hover:bg-orange-600"
+            }`}
           >
-            Login
+            {isLoading ? <FaSpinner className="animate-spin" /> : "Login"}
           </button>
         </form>
 
+        {/* Divider */}
         <div className="flex items-center gap-2 my-4">
           <div className="flex-1 h-px bg-gray-300"></div>
           <span className="text-gray-500 text-sm">Or sign in with</span>
           <div className="flex-1 h-px bg-gray-300"></div>
         </div>
 
+        {/* Social buttons */}
         <div className="flex gap-4">
           <button className="flex-1 flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-2 hover:bg-gray-50 cursor-pointer">
             <FcGoogle size={20} /> Google
@@ -125,7 +196,7 @@ const SignInModal = ({
           </button>
         </div>
 
-        {/* Switch to Sign Up */}
+        {/* Switch to Sign-Up */}
         <p className="text-center text-sm mt-6">
           Don’t have an account?{" "}
           <button
