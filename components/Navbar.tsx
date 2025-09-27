@@ -159,7 +159,7 @@ const Navbar = () => {
 
         {/* Mobile Sidebar */}
         <div
-          className={`fixed top-0 right-0 h-full bg-white w-[75%] sm:w-[60%] shadow-lg z-50 transform transition-transform duration-300 ${
+          className={`fixed top-0 right-0 h-screen bg-white/100 bg-opacity-100 w-[75%] sm:w-[60%] shadow-lg z-50 transform transition-transform duration-300 ${
             isOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
@@ -170,7 +170,7 @@ const Navbar = () => {
             </button>
           </div>
 
-          <ul className="flex flex-col gap-6 p-6 text-lg font-medium">
+          <ul className="flex flex-col gap-6 p-6 text-lg bg-white font-medium">
             {navLinks.map((link, i) => (
               <li key={i}>
                 <button
