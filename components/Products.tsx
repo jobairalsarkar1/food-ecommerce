@@ -1,40 +1,76 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
+import React, { useState, useMemo } from "react";
+import { useGetCategoriesQuery, useGetProductsQuery } from "../store/apiSlice";
+import { Category, DecoratedProduct } from "@/lib/types";
 import Badge from "./Badge";
-
-const dummyProducts = [
-  { id: 1, name: "Organic Apples", price: "$2.5/kg", category: "Fruits" },
-  { id: 2, name: "Fresh Carrots", price: "$1.8/kg", category: "Vegetables" },
-  { id: 3, name: "Mixed Salad", price: "$3.2/kg", category: "Salad" },
-  { id: 4, name: "Bananas", price: "$1.2/kg", category: "Fruits" },
-  { id: 5, name: "Tomatoes", price: "$2.0/kg", category: "Vegetables" },
-  { id: 6, name: "Green Salad Bowl", price: "$4.0/kg", category: "Salad" },
-  { id: 7, name: "Strawberries", price: "$5.0/kg", category: "Fruits" },
-  { id: 8, name: "Broccoli", price: "$2.8/kg", category: "Vegetables" },
-];
-
-const categories = ["All", "Fruits", "Vegetables", "Salad"];
+import Image from "next/image";
+import Link from "next/link";
 
 const Products = () => {
-  const [activeCategory, setActiveCategory] = useState("All");
+  const { data: categoriesData, isLoading: categoriesLoading } =
+    useGetCategoriesQuery();
+  const { data: productsData, isLoading: productsLoading } =
+    useGetProductsQuery();
+  const [activeCategory, setActiveCategory] = useState<string>("All");
 
-  const filteredProducts =
-    activeCategory === "All"
-      ? dummyProducts
-      : dummyProducts.filter((p) => p.category === activeCategory);
+  const categories: string[] = useMemo(() => {
+    if (!categoriesData) return ["All"];
+    return ["All", ...categoriesData.map((c: Category) => c.categoryName)];
+  }, [categoriesData]);
+
+  const products: DecoratedProduct[] = useMemo(() => {
+    if (!productsData) return [];
+
+    const categoryMap: Record<string, string> = {};
+    categoriesData?.forEach((c) => {
+      categoryMap[c.id] = c.categoryName;
+    });
+
+    return productsData.map((p) => ({
+      id: p.id,
+      name: p.productName,
+      price: `$${p.price}`,
+      category: categoryMap[p.categoryId] || "Unknown",
+      image: p.images[0] || "/featuring_01.png",
+    }));
+  }, [productsData, categoriesData]);
+
+  const filteredProducts = useMemo(
+    () =>
+      activeCategory === "All"
+        ? products
+        : products.filter((p) => p.category === activeCategory),
+    [activeCategory, products]
+  );
+
+  if (categoriesLoading || productsLoading)
+    return (
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 p-6">
+        {Array.from({ length: 8 }).map((_, idx) => (
+          <div
+            key={idx}
+            className="flex flex-col items-center rounded-xl p-5 bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08)] animate-pulse"
+          >
+            <div className="bg-gray-200 w-full h-48 rounded-lg mb-4" />
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+            <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
+            <div className="h-8 bg-gray-200 rounded w-full" />
+          </div>
+        ))}
+      </div>
+    );
 
   return (
     <div className="relative w-full py-12 px-6 sm:px-12 lg:px-20">
-      {/* Leaf decorations */}
+      {/* Leaf decorations */}{" "}
       <Image
         src="/fallen_leaf.png"
         alt="Leaf decoration"
         width={64}
         height={64}
         className="absolute top-10 right-[10%] w-16 h-16 object-contain rotate-[-80deg]"
-      />
+      />{" "}
       <Image
         src="/fallen_leaf.png"
         alt="Leaf decoration"
@@ -42,7 +78,6 @@ const Products = () => {
         height={64}
         className="absolute top-25 left-[12%] w-16 h-16 object-contain rotate-[150deg]"
       />
-
       <div className="mt-16 w-full flex flex-col items-center text-center max-w-2xl mx-auto mb-12">
         <Badge text="Our Products" />
         <h1 className="mt-4 text-3xl md:text-4xl font-bold text-[#212337]">
@@ -53,7 +88,6 @@ const Products = () => {
           fruits, vegetables, and salad ingredients.
         </p>
       </div>
-
       {/* Filter tabs */}
       <div className="flex flex-wrap justify-center gap-3 mb-10">
         {categories.map((cat) => (
@@ -71,19 +105,17 @@ const Products = () => {
           </button>
         ))}
       </div>
-
       {/* Products grid */}
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {filteredProducts.map((product) => (
-          <div
+          <Link
             key={product.id}
-            className="flex flex-col items-center rounded-xl p-5 bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08)] 
-                   hover:shadow-[0_6px_20px_rgba(0,0,0,0.12)] 
-                   transition"
+            href={`/products/${product.id}`}
+            className="flex flex-col items-center rounded-xl p-5 bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.12)] transition"
           >
             <div className="bg-gray-100 w-full h-48 flex items-center justify-center rounded-lg">
-              <Image
-                src="/featuring_01.png"
+              <img
+                src={product.image}
                 alt={product.name}
                 width={150}
                 height={150}
@@ -100,7 +132,7 @@ const Products = () => {
                 Add to Cart
               </button>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

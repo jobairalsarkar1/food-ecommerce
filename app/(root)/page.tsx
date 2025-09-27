@@ -26,10 +26,10 @@ export default function Home() {
   };
 
   useEffect(() => {
-    // Run when page loads (e.g. direct /#about)
+    // run when page loads (direct /#about)
     scrollToHash();
 
-    // Run on hash change (when clicking between sections on the same page)
+    // 4un on hash change (when clicking between sections on the same page)
     window.addEventListener("hashchange", scrollToHash);
 
     return () => {
