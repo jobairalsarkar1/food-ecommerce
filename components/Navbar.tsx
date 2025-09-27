@@ -85,7 +85,7 @@ const Navbar = () => {
 
           {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-6 relative">
-            <button className="flex items-center gap-2">
+            <button className="flex items-center gap-1">
               <MdFavorite className="w-6 h-6 text-[#749B3F]" />
               Favorite
             </button>
@@ -94,7 +94,7 @@ const Navbar = () => {
             <div className="relative">
               <button
                 onClick={() => setShowCartModal(!showCartModal)}
-                className="flex items-center gap-2 relative"
+                className="flex items-center gap-1 relative"
               >
                 <div className="relative">
                   <IoCart className="w-6 h-6 text-[#749B3F]" />
@@ -104,7 +104,7 @@ const Navbar = () => {
                     </span>
                   )}
                 </div>
-                <span className="ml-2">Cart</span>
+                <span className="ml-1">Cart</span>
               </button>
 
               {showCartModal && (
