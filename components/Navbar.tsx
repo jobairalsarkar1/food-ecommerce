@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { BsGridFill } from "react-icons/bs";
 import { IoCart, IoMenu, IoClose } from "react-icons/io5";
 import { MdFavorite } from "react-icons/md";
 import { usePathname, useRouter } from "next/navigation";
-import SignInModal from "@/components/SignInModal";
-import SignUpModal from "@/components/SignUpModal";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import CartModal from "@/components/CartModal";
+import SignInModal from "@/components/SignInModal";
+import SignUpModal from "@/components/SignUpModal";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,14 +17,16 @@ const Navbar = () => {
   const [showSignUp, setShowSignUp] = useState(false);
   const [showCartModal, setShowCartModal] = useState(false);
 
-  const cartRef = useRef<HTMLDivElement>(null);
+  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const auth = useSelector((state: RootState) => state.auth);
+
   const pathname = usePathname();
   const router = useRouter();
 
-  const cartItems = useSelector((state: RootState) => state.cart.items);
-  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-
-  const auth = useSelector((state: RootState) => state.auth);
+  const userInitial = auth.user?.userName
+    ? auth.user.userName.charAt(0).toUpperCase()
+    : auth.user?.email?.charAt(0).toUpperCase() || "";
 
   const navLinks = [
     { name: "Home", href: "/#home" },
@@ -47,22 +49,6 @@ const Navbar = () => {
 
   const currentHash = typeof window !== "undefined" ? window.location.hash : "";
 
-  // Click outside to close cart
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
-        setShowCartModal(false);
-      }
-    };
-    if (showCartModal)
-      document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showCartModal]);
-
-  const userInitial = auth.user?.userName
-    ? auth.user.userName.charAt(0).toUpperCase()
-    : auth.user?.email?.charAt(0).toUpperCase() || "";
-
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-xs">
@@ -73,7 +59,7 @@ const Navbar = () => {
             <span>Fresh Harvest</span>
           </div>
 
-          {/* Desktop nav links */}
+          {/* Desktop nav lins */}
           <nav className="hidden md:block">
             <ul className="flex items-center gap-10">
               {navLinks.map((link, i) => {
@@ -104,18 +90,20 @@ const Navbar = () => {
               Favorite
             </button>
 
-            {/* Cart wrapper */}
-            <div ref={cartRef} className="relative">
+            {/* Cart */}
+            <div className="relative">
               <button
                 onClick={() => setShowCartModal(!showCartModal)}
                 className="flex items-center gap-2 relative"
               >
-                <IoCart className="w-6 h-6 text-[#749B3F]" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 border-2 border-gray-200 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                    {cartCount}
-                  </span>
-                )}
+                <div className="relative">
+                  <IoCart className="w-6 h-6 text-[#749B3F]" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 border-2 border-gray-200 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                      {cartCount}
+                    </span>
+                  )}
+                </div>
                 <span className="ml-2">Cart</span>
               </button>
 
@@ -127,7 +115,7 @@ const Navbar = () => {
               )}
             </div>
 
-            {/* User login / avatar */}
+            {/* User avatar */}
             {auth.user ? (
               <div className="w-10 h-10 bg-[#749B3F] text-white rounded-full flex items-center justify-center font-semibold text-lg">
                 {userInitial}
@@ -155,6 +143,7 @@ const Navbar = () => {
                 </span>
               )}
             </button>
+
             {showCartModal && (
               <CartModal
                 onClose={() => setShowCartModal(false)}
