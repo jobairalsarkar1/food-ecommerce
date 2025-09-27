@@ -6,19 +6,19 @@ import Badge from "./Badge";
 
 const reviews = [
   {
-    img: "/stock_01.jpeg",
+    img: "/person.jpg",
     text: "Fresh Harvest has completely changed the way I shop for produce. Everything is so fresh and delivered on time. I used to spend hours at grocery stores, but now I get farm-fresh items delivered to my door. The difference in taste and quality is just amazing!",
     name: "Jane Doe",
     role: "Nutritionist",
   },
   {
-    img: "/stock_01.jpeg",
+    img: "/person.jpg",
     text: "I love how easy it is to order seasonal fruits and veggies. The quality is unmatched, and their packaging is eco-friendly too. Fresh Harvest has made it so simple to enjoy healthy meals without worrying about freshness or availability at local stores.",
     name: "John Smith",
     role: "Chef",
   },
   {
-    img: "/stock_01.jpeg",
+    img: "/person.jpg",
     text: "As a busy professional, Fresh Harvest saves me so much time. I no longer need to rush to the supermarket after work. The app is easy to use, deliveries are reliable, and I feel good about supporting local farmers through their service.",
     name: "Emily Johnson",
     role: "Teacher",
