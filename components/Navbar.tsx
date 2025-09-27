@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import React, { useState } from "react";
 import { BsGridFill } from "react-icons/bs";
 import { IoCart, IoMenu, IoClose } from "react-icons/io5";
 import { MdFavorite } from "react-icons/md";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import SignInModal from "@/components/SignInModal";
 import SignUpModal from "@/components/SignUpModal";
 
@@ -14,38 +13,67 @@ const Navbar = () => {
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const cartCount = 3;
 
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Shop", href: "/shop" },
-    { name: "About Us", href: "/about" },
-    { name: "Blog", href: "/blog" },
+    { name: "Home", href: "/#home" },
+    { name: "Shop", href: "/#shop" },
+    { name: "About Us", href: "/#about" },
+    { name: "Blog", href: "/#blog" },
   ];
+
+  const handleNavClick = (href: string) => {
+    const [, hash] = href.split("#");
+
+    if (pathname === "/" && hash) {
+      // update URL hash without scrolling
+      if (window.location.hash !== `#${hash}`) {
+        router.replace(`#${hash}`, { scroll: false });
+      }
+
+      // scroll to section
+      const el = document.getElementById(hash);
+      if (el) {
+        window.scrollTo({
+          top: el.offsetTop - 70,
+          behavior: "smooth",
+        });
+      }
+    } else {
+      // navigate to home + hash
+      router.push(href);
+    }
+  };
+
+  const currentHash = typeof window !== "undefined" ? window.location.hash : "";
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50">
-        <div className="w-full h-16 flex items-center justify-between px-4 sm:px-8 md:px-12 lg:px-20 md:bg-transparent backdrop-blur-xs">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-xs">
+        <div className="w-full h-16 flex items-center justify-between px-4 sm:px-8 md:px-12 lg:px-20">
           {/* Branding */}
           <div className="flex items-center gap-2 font-bold text-xl">
             <BsGridFill className="w-7 h-7 text-[#749B3F]" />
             <span>Fresh Harvest</span>
           </div>
 
-          {/* Nav links (Desktop) */}
+          {/* Desktop nav links */}
           <nav className="hidden md:block">
             <ul className="flex items-center gap-10">
               {navLinks.map((link, i) => {
-                const isActive = pathname === link.href;
+                const isActive =
+                  pathname === "/" &&
+                  currentHash === `#${link.href.split("#")[1]}`;
+
                 return (
                   <li key={i} className="relative">
-                    <Link
-                      href={link.href}
+                    <button
+                      onClick={() => handleNavClick(link.href)}
                       className="text-gray-800 font-medium hover:text-[#749B3F] transition"
                     >
                       {link.name}
-                    </Link>
+                    </button>
                     {isActive && (
                       <span className="absolute left-1/2 -translate-x-1/2 -bottom-1 h-[3px] w-2/3 bg-[#749B3F] rounded-full"></span>
                     )}
@@ -55,25 +83,22 @@ const Navbar = () => {
             </ul>
           </nav>
 
-          {/* Favorite, Cart, Auth (Desktop) */}
+          {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-6">
-            <Link href="#" className="flex items-center gap-2">
+            <button className="flex items-center gap-2">
               <MdFavorite className="w-6 h-6 text-[#749B3F]" />
               Favorite
-            </Link>
+            </button>
 
-            {/* Cart with badge */}
-            <Link href="#" className="flex items-center gap-2">
-              <div className="relative">
-                <IoCart className="w-6 h-6 text-[#749B3F]" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 border-2 border-gray-200 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                    {cartCount}
-                  </span>
-                )}
-              </div>
-              <span>Cart</span>
-            </Link>
+            <button className="flex items-center gap-2 relative">
+              <IoCart className="w-6 h-6 text-[#749B3F]" />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 border-2 border-gray-200 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                  {cartCount}
+                </span>
+              )}
+              <span className="ml-2">Cart</span>
+            </button>
 
             <button
               onClick={() => setShowSignIn(true)}
@@ -85,16 +110,14 @@ const Navbar = () => {
 
           {/* Mobile Icons */}
           <div className="md:hidden flex items-center gap-4">
-            {/* Cart */}
-            <Link href="#" className="relative">
+            <button className="relative">
               <IoCart className="w-7 h-7 text-[#749B3F]" />
               {cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 border border-gray-100 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
                   {cartCount}
                 </span>
               )}
-            </Link>
-            {/* Hamburger */}
+            </button>
             <button onClick={() => setIsOpen(true)}>
               <IoMenu className="w-8 h-8 text-gray-800" />
             </button>
@@ -115,22 +138,24 @@ const Navbar = () => {
           </div>
 
           <ul className="flex flex-col gap-6 p-6 text-lg font-medium">
-            {navLinks.map((link, i) => {
-              const isActive = pathname === link.href;
-              return (
-                <li key={i}>
-                  <Link
-                    href={link.href}
-                    className={`block transition ${
-                      isActive ? "text-[#749B3F]" : "text-gray-800"
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              );
-            })}
+            {navLinks.map((link, i) => (
+              <li key={i}>
+                <button
+                  onClick={() => {
+                    handleNavClick(link.href);
+                    setIsOpen(false);
+                  }}
+                  className={`block transition ${
+                    pathname === "/" &&
+                    currentHash === `#${link.href.split("#")[1]}`
+                      ? "text-[#749B3F]"
+                      : "text-gray-800"
+                  }`}
+                >
+                  {link.name}
+                </button>
+              </li>
+            ))}
           </ul>
 
           <div className="px-6">
