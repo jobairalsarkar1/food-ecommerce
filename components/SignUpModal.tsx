@@ -20,12 +20,51 @@ const SignUpModal = ({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Mock Sign Up Data:", { fullName, email, password });
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const res = await fetch(
+        "https://api-fresh-harvest.code-commando.com/api/v1/users/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ fullName, email, password }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Something went wrong");
+      } else {
+        setSuccess("Registration successful!");
+        setFullName("");
+        setEmail("");
+        setPassword("");
+        // Closes modal automatically after 2 seconds
+        setTimeout(onClose, 2000);
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Network error");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -48,6 +87,11 @@ const SignUpModal = ({
         <h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          {success && (
+            <p className="text-green-500 text-sm text-center">{success}</p>
+          )}
+
           {/* Full Name */}
           <div>
             <label className="block text-sm font-medium mb-1">Full Name</label>
@@ -57,7 +101,7 @@ const SignUpModal = ({
               onChange={(e) => setFullName(e.target.value)}
               required
               placeholder="Enter your name"
-              className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#749B3F]"
+              className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -99,9 +143,14 @@ const SignUpModal = ({
           {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg py-2 cursor-pointer"
+            disabled={loading}
+            className={`w-full text-white font-semibold rounded-lg py-2 ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-orange-500 hover:bg-orange-600 cursor-pointer"
+            }`}
           >
-            Sign Up
+            {loading ? "Signing Up..." : "Sign Up"}
           </button>
         </form>
 
