@@ -6,10 +6,15 @@ import { useGetProductsQuery, useGetCategoriesQuery } from "@/store/apiSlice";
 import Badge from "@/components/Badge";
 import { FaStar, FaHeart, FaShoppingCart } from "react-icons/fa";
 import Link from "next/link";
+import { useDispatch } from "react-redux";
+import { addToCart } from "@/store/cartSlice";
+import { AppDispatch } from "@/store/store";
+import { Product } from "@/lib/types";
 
 const ProductPage = () => {
   const params = useParams();
   const productId = params.id;
+  const dispatch = useDispatch<AppDispatch>();
 
   const { data: productsData, isLoading: productsLoading } =
     useGetProductsQuery();
@@ -19,13 +24,13 @@ const ProductPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("Description");
 
-  // Get the product
   const product = productsData?.find((p) => p.id === productId);
 
-  // Memoize images array to prevent useEffect dependency issues
-  const images = useMemo(() => {
-    return product?.images?.length ? product.images : ["/featuring_01.png"];
-  }, [product]);
+  // Memoize images array
+  const images = useMemo(
+    () => (product?.images?.length ? product.images : ["/featuring_01.png"]),
+    [product]
+  );
 
   // Auto-slide images
   useEffect(() => {
@@ -35,7 +40,11 @@ const ProductPage = () => {
     return () => clearInterval(interval);
   }, [images]);
 
-  // Skeleton loader
+  // Add to cart button handler
+  const handleAddToCart = (p: Product, qty: number) => {
+    dispatch(addToCart({ product: p, quantity: qty }));
+  };
+
   if (productsLoading) {
     return (
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 p-6">
@@ -58,7 +67,7 @@ const ProductPage = () => {
     return <div className="text-center py-20">Product not found!</div>;
   }
 
-  // Related products (same category, exclude current product)
+  // Related products
   const relatedProducts =
     productsData
       ?.filter(
@@ -76,7 +85,6 @@ const ProductPage = () => {
             alt={product.productName}
             className="w-full h-[400px] object-cover rounded-lg"
           />
-          {/* Dots */}
           <div className="flex justify-center mt-4 space-x-2">
             {images.map((_, index) => (
               <button
@@ -90,7 +98,6 @@ const ProductPage = () => {
           </div>
         </div>
 
-        {/* Product details */}
         <div className="flex flex-col justify-between gap-4">
           <div className="space-y-4">
             <div className="inline-block">
@@ -147,7 +154,10 @@ const ProductPage = () => {
               <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#F4F6F6] hover:bg-gray-100 cursor-pointer">
                 <FaHeart className="text-gray-300" /> Save as Favorite
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 cursor-pointer">
+              <button
+                onClick={() => handleAddToCart(product, quantity)}
+                className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 cursor-pointer"
+              >
                 <FaShoppingCart /> Add to Cart
               </button>
             </div>
@@ -198,29 +208,35 @@ const ProductPage = () => {
 
           <div className="mt-16 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
             {relatedProducts.map((p) => (
-              <Link
+              <div
                 key={p.id}
-                href={`/products/${p.id}`}
                 className="flex flex-col items-center rounded-xl p-5 bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.12)] transition"
               >
-                <div className="bg-gray-100 w-full h-44 flex items-center justify-center rounded-lg">
-                  <img
-                    src={p.images[0] || "/featuring_01.png"}
-                    alt={p.productName}
-                    className="object-contain w-32 h-32"
-                  />
-                </div>
+                <Link
+                  href={`/products/${p.id}`}
+                  className="w-full flex justify-center"
+                >
+                  <div className="bg-gray-100 w-full h-44 flex items-center justify-center rounded-lg">
+                    <img
+                      src={p.images[0] || "/featuring_01.png"}
+                      alt={p.productName}
+                      className="object-contain w-32 h-32"
+                    />
+                  </div>
+                </Link>
                 <div className="flex flex-col items-center text-center mt-4 w-full">
                   <h3 className="text-lg font-semibold text-[#212337]">
                     {p.productName}
                   </h3>
                   <p className="text-gray-600 mt-1">${p.price}/kg</p>
-                  <button className="mt-4 w-full px-5 py-2 rounded-md border border-gray-300 text-gray-700 font-medium transition hover:bg-orange-500 hover:text-white hover:border-orange-500 cursor-pointer">
-                    {" "}
-                    Add to Cart{" "}
+                  <button
+                    onClick={() => handleAddToCart(p, 1)}
+                    className="mt-4 w-full px-5 py-2 rounded-md border border-gray-300 text-gray-700 font-medium transition hover:bg-orange-500 hover:text-white hover:border-orange-500 cursor-pointer"
+                  >
+                    Add to Cart
                   </button>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </div>

@@ -6,8 +6,12 @@ import { Category, DecoratedProduct } from "@/lib/types";
 import Badge from "./Badge";
 import Image from "next/image";
 import Link from "next/link";
+import { useDispatch } from "react-redux";
+import { addToCart } from "@/store/cartSlice";
+import { AppDispatch } from "@/store/store";
 
 const Products = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const { data: categoriesData, isLoading: categoriesLoading } =
     useGetCategoriesQuery();
   const { data: productsData, isLoading: productsLoading } =
@@ -19,14 +23,12 @@ const Products = () => {
     return ["All", ...categoriesData.map((c: Category) => c.categoryName)];
   }, [categoriesData]);
 
-  const products: DecoratedProduct[] = useMemo(() => {
+  const decoratedProducts: DecoratedProduct[] = useMemo(() => {
     if (!productsData) return [];
-
     const categoryMap: Record<string, string> = {};
     categoriesData?.forEach((c) => {
       categoryMap[c.id] = c.categoryName;
     });
-
     return productsData.map((p) => ({
       id: p.id,
       name: p.productName,
@@ -39,9 +41,9 @@ const Products = () => {
   const filteredProducts = useMemo(
     () =>
       activeCategory === "All"
-        ? products
-        : products.filter((p) => p.category === activeCategory),
-    [activeCategory, products]
+        ? decoratedProducts
+        : decoratedProducts.filter((p) => p.category === activeCategory),
+    [activeCategory, decoratedProducts]
   );
 
   if (categoriesLoading || productsLoading)
@@ -63,14 +65,14 @@ const Products = () => {
 
   return (
     <div className="relative w-full py-12 px-6 sm:px-12 lg:px-20">
-      {/* Leaf decorations */}{" "}
+      {/* Leaf decorations */}
       <Image
         src="/fallen_leaf.png"
         alt="Leaf decoration"
         width={64}
         height={64}
         className="absolute top-10 right-[10%] w-16 h-16 object-contain rotate-[-80deg]"
-      />{" "}
+      />
       <Image
         src="/fallen_leaf.png"
         alt="Leaf decoration"
@@ -78,6 +80,7 @@ const Products = () => {
         height={64}
         className="absolute top-25 left-[12%] w-16 h-16 object-contain rotate-[150deg]"
       />
+
       <div className="mt-16 w-full flex flex-col items-center text-center max-w-2xl mx-auto mb-12">
         <Badge text="Our Products" />
         <h1 className="mt-4 text-3xl md:text-4xl font-bold text-[#212337]">
@@ -88,6 +91,7 @@ const Products = () => {
           fruits, vegetables, and salad ingredients.
         </p>
       </div>
+
       {/* Filter tabs */}
       <div className="flex flex-wrap justify-center gap-3 mb-10">
         {categories.map((cat) => (
@@ -105,35 +109,52 @@ const Products = () => {
           </button>
         ))}
       </div>
+
       {/* Products grid */}
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {filteredProducts.map((product) => (
-          <Link
-            key={product.id}
-            href={`/products/${product.id}`}
-            className="flex flex-col items-center rounded-xl p-5 bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.12)] transition"
-          >
-            <div className="bg-gray-100 w-full h-48 flex items-center justify-center rounded-lg">
-              <img
-                src={product.image}
-                alt={product.name}
-                width={150}
-                height={150}
-                className="object-contain"
-              />
-            </div>
+        {filteredProducts.map((decoratedProduct) => {
+          const fullProduct = productsData?.find(
+            (p) => p.id === decoratedProduct.id
+          );
+          if (!fullProduct) return null;
 
-            <div className="flex flex-col items-center text-center mt-4 w-full">
-              <h3 className="text-lg font-semibold text-[#212337]">
-                {product.name}
-              </h3>
-              <p className="text-gray-600 mt-1">{product.price}</p>
-              <button className="mt-4 w-full px-5 py-2 rounded-md border border-gray-300 text-gray-700 font-medium transition hover:bg-orange-500 hover:text-white hover:border-orange-500 cursor-pointer">
-                Add to Cart
-              </button>
+          return (
+            <div
+              key={decoratedProduct.id}
+              className="flex flex-col items-center rounded-xl p-5 bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.12)] transition"
+            >
+              <Link
+                href={`/products/${decoratedProduct.id}`}
+                className="w-full flex justify-center"
+              >
+                <div className="bg-gray-100 w-full h-48 flex items-center justify-center rounded-lg">
+                  <img
+                    src={decoratedProduct.image}
+                    alt={decoratedProduct.name}
+                    width={150}
+                    height={150}
+                    className="object-contain"
+                  />
+                </div>
+              </Link>
+
+              <div className="flex flex-col items-center text-center mt-4 w-full">
+                <h3 className="text-lg font-semibold text-[#212337]">
+                  {decoratedProduct.name}
+                </h3>
+                <p className="text-gray-600 mt-1">{decoratedProduct.price}</p>
+                <button
+                  onClick={() =>
+                    dispatch(addToCart({ product: fullProduct, quantity: 1 }))
+                  }
+                  className="mt-4 w-full px-5 py-2 rounded-md border border-gray-300 text-gray-700 font-medium transition hover:bg-orange-500 hover:text-white hover:border-orange-500 cursor-pointer"
+                >
+                  Add to Cart
+                </button>
+              </div>
             </div>
-          </Link>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

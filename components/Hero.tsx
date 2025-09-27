@@ -47,7 +47,7 @@ const Hero = () => {
           {/* Shop Now Button */}
           <div className="relative mt-3">
             <Link
-              href="#"
+              href="/#shop"
               className="px-6 py-2.5 text-base sm:text-lg font-semibold rounded-lg text-white bg-orange-500 hover:bg-orange-600 cursor-pointer inline-flex items-center gap-2"
             >
               Shop Now

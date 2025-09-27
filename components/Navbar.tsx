@@ -1,20 +1,28 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { BsGridFill } from "react-icons/bs";
 import { IoCart, IoMenu, IoClose } from "react-icons/io5";
 import { MdFavorite } from "react-icons/md";
 import { usePathname, useRouter } from "next/navigation";
 import SignInModal from "@/components/SignInModal";
 import SignUpModal from "@/components/SignUpModal";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import CartModal from "@/components/CartModal";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
+  const [showCartModal, setShowCartModal] = useState(false);
+
+  const cartRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
-  const cartCount = 3;
+
+  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const navLinks = [
     { name: "Home", href: "/#home" },
@@ -25,28 +33,29 @@ const Navbar = () => {
 
   const handleNavClick = (href: string) => {
     const [, hash] = href.split("#");
-
     if (pathname === "/" && hash) {
-      // update URL hash without scrolling
-      if (window.location.hash !== `#${hash}`) {
+      if (window.location.hash !== `#${hash}`)
         router.replace(`#${hash}`, { scroll: false });
-      }
-
-      // scroll to section
       const el = document.getElementById(hash);
-      if (el) {
-        window.scrollTo({
-          top: el.offsetTop - 70,
-          behavior: "smooth",
-        });
-      }
+      if (el) window.scrollTo({ top: el.offsetTop - 70, behavior: "smooth" });
     } else {
-      // navigate to home + hash
       router.push(href);
     }
   };
 
   const currentHash = typeof window !== "undefined" ? window.location.hash : "";
+
+  // Click outside to close cart
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
+        setShowCartModal(false);
+      }
+    };
+    if (showCartModal)
+      document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showCartModal]);
 
   return (
     <>
@@ -65,7 +74,6 @@ const Navbar = () => {
                 const isActive =
                   pathname === "/" &&
                   currentHash === `#${link.href.split("#")[1]}`;
-
                 return (
                   <li key={i} className="relative">
                     <button
@@ -84,21 +92,34 @@ const Navbar = () => {
           </nav>
 
           {/* Desktop actions */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-6 relative">
             <button className="flex items-center gap-2">
               <MdFavorite className="w-6 h-6 text-[#749B3F]" />
               Favorite
             </button>
 
-            <button className="flex items-center gap-2 relative">
-              <IoCart className="w-6 h-6 text-[#749B3F]" />
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 border-2 border-gray-200 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                  {cartCount}
-                </span>
+            {/* Cart wrapper */}
+            <div ref={cartRef} className="relative">
+              <button
+                onClick={() => setShowCartModal(!showCartModal)}
+                className="flex items-center gap-2 relative"
+              >
+                <IoCart className="w-6 h-6 text-[#749B3F]" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 border-2 border-gray-200 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                    {cartCount}
+                  </span>
+                )}
+                <span className="ml-2">Cart</span>
+              </button>
+
+              {showCartModal && (
+                <CartModal
+                  onClose={() => setShowCartModal(false)}
+                  className="absolute top-full right-0 mt-2 w-80 z-50"
+                />
               )}
-              <span className="ml-2">Cart</span>
-            </button>
+            </div>
 
             <button
               onClick={() => setShowSignIn(true)}
@@ -109,8 +130,11 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Icons */}
-          <div className="md:hidden flex items-center gap-4">
-            <button className="relative">
+          <div className="md:hidden flex items-center gap-4 relative">
+            <button
+              onClick={() => setShowCartModal(!showCartModal)}
+              className="relative z-50"
+            >
               <IoCart className="w-7 h-7 text-[#749B3F]" />
               {cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 border border-gray-100 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
@@ -118,6 +142,13 @@ const Navbar = () => {
                 </span>
               )}
             </button>
+            {showCartModal && (
+              <CartModal
+                onClose={() => setShowCartModal(false)}
+                className="fixed top-16 right-4 w-72 z-[1000]"
+              />
+            )}
+
             <button onClick={() => setIsOpen(true)}>
               <IoMenu className="w-8 h-8 text-gray-800" />
             </button>
@@ -171,7 +202,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Overlay */}
+        {/* Overlay for sidebar */}
         {isOpen && (
           <div
             onClick={() => setIsOpen(false)}
@@ -180,25 +211,23 @@ const Navbar = () => {
         )}
       </header>
 
-      {/* Modals */}
-      <div className="bg-green-500 mx-4">
-        <SignInModal
-          isOpen={showSignIn}
-          onClose={() => setShowSignIn(false)}
-          onSwitchToSignUp={() => {
-            setShowSignIn(false);
-            setShowSignUp(true);
-          }}
-        />
-        <SignUpModal
-          isOpen={showSignUp}
-          onClose={() => setShowSignUp(false)}
-          onSwitchToSignIn={() => {
-            setShowSignUp(false);
-            setShowSignIn(true);
-          }}
-        />
-      </div>
+      {/* Sign In/Sign Up Modals */}
+      <SignInModal
+        isOpen={showSignIn}
+        onClose={() => setShowSignIn(false)}
+        onSwitchToSignUp={() => {
+          setShowSignIn(false);
+          setShowSignUp(true);
+        }}
+      />
+      <SignUpModal
+        isOpen={showSignUp}
+        onClose={() => setShowSignUp(false)}
+        onSwitchToSignIn={() => {
+          setShowSignUp(false);
+          setShowSignIn(true);
+        }}
+      />
     </>
   );
 };
